@@ -20,9 +20,8 @@ router.post(
   isAuth,
   [
     body("title", "title is not valid").isString().trim(),
-    body("url", "not valid url"),//.isURL(),
     body("price", "please enter bblabla").isFloat(),
-    body("description").isLength({ min: 5, max: 400 }).trim(),
+    body("description").isLength({ min: 3, max: 400 }).trim(),
   ],
   adminController.postAddProduct
 );
@@ -30,11 +29,6 @@ router.post(
 router.get(
   "/edit-product/:productId",
   isAuth,
-  [
-    body("title", "title is not valid").isString().trim(),
-    body("price", "please enter bblabla").isFloat(),
-    body("description").isLength({ min: 5, max: 400 }).trim(),
-  ],
   adminController.getEditProduct
 );
 
@@ -43,9 +37,8 @@ router.post(
   isAuth,
   [
     body("title", "title is not valid").isString().trim(),
-    body("url", "not valid url"),//.isURL(),
     body("price", "please enter bblabla").isFloat(),
-    body("description").isLength({ min: 5, max: 400 }).trim(),
+    body("description").isLength({ min:3, max: 400 }).trim(),
   ],
   adminController.postEditProduct
 );

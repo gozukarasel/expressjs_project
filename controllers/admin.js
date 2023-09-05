@@ -23,10 +23,27 @@ exports.postAddProduct = (req, res, next) => {
   const errors = validationResult(req);
 
   const title = req.body.title;
-  const imageUrl = req.file;
+  const image = req.file;
   const price = req.body.price;
   const description = req.body.description;
-  console.log("deneme")
+
+  if (!image) {
+    return res.status(422).render("admin/edit-product", {
+      // error varsa 422 validation errorcode!
+      pageTitle: "Add Product",
+      path: "/admin/add-product",
+      editing: false,
+      hasError: true,
+      product: {
+        title: title,
+        price: price,
+        description: description,
+      },
+      errorMessage: "Attached file is not image.", // errorMessage'a dikkat statik verdik!
+    });
+  }
+  console.log(image);
+  const imageUrl = image.path; // bir resmi database'e kaydetmek için çok fazla veri o yüzden path olarak kaydediyoruz
   console.log(imageUrl);
   const product = new Product({
     title: title,
@@ -46,7 +63,6 @@ exports.postAddProduct = (req, res, next) => {
       hasError: true,
       product: {
         title: title,
-        imageUrl: imageUrl,
         price: price,
         description: description,
       },
@@ -91,14 +107,17 @@ exports.postAddProduct = (req, res, next) => {
 /* ----------------------------------------------*/
 
 exports.postEditProduct = (req, res, next) => {
-  
   const errors = validationResult(req);
 
   const productId = req.body.productId;
   const updatedTitle = req.body.title;
-  const updatedImageUrl = req.body.imageUrl;
+  const updatedImage = req.file;
   const updatedPrice = req.body.price;
   const updatedDescription = req.body.description;
+
+
+// bir resmi database'e kaydetmek için çok fazla veri o yüzden path olarak kaydediyoruz
+
 
   if (!errors.isEmpty()) {
     return res.status(422).render("admin/edit-product", {
@@ -109,7 +128,6 @@ exports.postEditProduct = (req, res, next) => {
       hasError: true,
       product: {
         title: updatedTitle,
-        imageUrl: updatedImageUrl,
         price: updatedPrice,
         description: updatedDescription,
         _id: productId,
@@ -126,9 +144,12 @@ exports.postEditProduct = (req, res, next) => {
       //authorizaton! sadece req.user'ın olduğu kişi editleyebilsin diye!
       return res.redirect("/");
     }
+    // Her zaman image'ı değiştirmek istemeyebilirim. yoksa işlem yapmıyorum imageUrl hakkında!
+    if (updatedImage) {
+      product.imageUrl = updatedImage.path;
+    }
 
     product.title = updatedTitle;
-    product.imageUrl = updatedImageUrl;
     product.price = updatedPrice;
     product.description = updatedDescription;
 
@@ -142,7 +163,8 @@ exports.postEditProduct = (req, res, next) => {
       .catch((err) => {
         const error = new Error(err);
         error.httpStatusCode = 500;
-        return next(error); // error middleware'ine gitmesini sağladık
+        // error middleware'ine gitmesini sağladık
+        return next(error);
       });
   });
 };
@@ -173,7 +195,9 @@ exports.getEditProduct = (req, res, next) => {
 /* ----------------------------------------------*/
 
 exports.getProducts = (req, res, next) => {
-  Product.find({ userId: req.user._id }) //Authorization için filter ekledik. sadece o kişinin eklediği productlar gözükebilsin diye.
+
+  //Authorization için filter ekledik. sadece o kişinin eklediği productlar gözükebilsin diye.
+  Product.find({ userId: req.user._id }) 
     // .select('title _id ') // burayı bi bakarsın tekrar
     // .populate('userId')
     .then((products) => {
@@ -199,7 +223,7 @@ exports.getProducts = (req, res, next) => {
 exports.postDeleteProduct = (req, res, next) => {
   const deletedId = req.body.deletedId;
 
-  Product.deleteOne({ _id: deletedId, userId: req.user._id }) // userId: req.user._id
+  Product.deleteOne({ _id: deletedId, userId: req.user._id }) // userId: req.user._id! 
     .then((result) => {
       console.log("Product deleted with id: ", deletedId);
       res.redirect("/admin/products");

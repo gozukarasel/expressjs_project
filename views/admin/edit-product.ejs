@@ -11,7 +11,7 @@
 <% } %>
 
 
-  <form class="login" action="/admin/<% if (editing) { %>edit-product<% } else { %>add-product<% } %>" method="POST" enctype ="multipart/form-data">
+  <form class="login" action="/admin/<% if (editing) { %>edit-product<% } else { %>add-product<% } %>" method="POST" enctype ="multipart/form-data"> <!-- enctyope dediğim şey image şeklinde attığım post verisi binary code a çevrilmeye yarayan html methodu!! -->
     <div class="form-control">
       <label for="title">Title</label>
       <input type="text" name="title" id="title" value="<% if (editing || hasError) { %><%= product.title %><% } %>">

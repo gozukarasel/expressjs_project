@@ -143,7 +143,7 @@ exports.postLogin = (req, res, next) => {
             req.session.isLoggedIn = true;
 
             return req.session.save((err) => {
-              console.log(err);
+              //console.log(err);
               res.redirect("/");
             });
           }
@@ -331,7 +331,7 @@ exports.postLogout = (req, res, next) => {
     if (err) {
       console.log(err);
     }
-    console.log("Logout event done with: ", req.user.email);
+    console.log("Logout event done with:", req.user.email);
     res.redirect("/");
   });
 };

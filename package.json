@@ -35,6 +35,7 @@
     "nodemailer": "^6.9.4",
     "nodemailer-mailgun-transport": "^2.1.5",
     "nodemailer-postmark-transport": "^5.2.1",
+    "pdfkit": "^0.13.0",
     "pug": "^3.0.2",
     "sequelize": "^6.32.1",
     "tiny-csrf": "^1.1.3"

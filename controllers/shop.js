@@ -1,5 +1,23 @@
+/* ----------------------------------------------*/
+/*
+ * Libraries
+ */
+/* ----------------------------------------------*/
+
+const fs = require("fs");
+const path = require("path");
+
+const PDFDocument = require("pdfkit");
+
+/* ----------------------------------------------*/
+/*
+ * Models
+ */
+/* ----------------------------------------------*/
+
 const Product = require("../models/product");
 const Order = require("../models/order");
+const user = require("../models/user");
 
 /* ----------------------------------------------*/
 /*
@@ -134,7 +152,7 @@ exports.getOrders = (req, res, next) => {
   //console.log("buraya geldim mi");
   Order.find({ "user.userId": req.session.user._id })
     .then((orders) => {
-      //console.log(orders);
+      console.log(orders);
       res.render("shop/orders", {
         path: "/orders",
         pageTitle: "Your Orders",
@@ -176,5 +194,63 @@ exports.postOrder = (req, res, next) => {
       const error = new Error(err);
       error.httpStatusCode = 500;
       return next(error); // error middleware'ine gitmesini sağladık);
+    });
+};
+
+/* ----------------------------------------------*/
+/*
+ * downloading invoice for user order.
+ */
+/* ----------------------------------------------*/
+
+exports.getInvoice = (req, res, next) => {
+  // atadığımız url'den gelecek!
+  const orderId = req.params.orderId;
+
+  const invoiceFileName = "invoice-" + req.user._id + "-" + orderId + ".pdf"; // bu her fatura için otomatik generate edilecek çünkü bunu biz böyle belirledik!
+  const invoicePath = path.join("data", "invoices", invoiceFileName);
+
+  Order.findById(orderId)
+    .then((order) => {
+      if (!order) {
+        return next(new Error("No order found!"));
+      }
+
+      if (order.user.userId.toString() !== req.user._id.toString()) {
+        return next(new Error("Unauthorized"));
+      }
+
+      const pdfDoc = new PDFDocument();
+      pdfDoc.pipe(fs.createWriteStream(invoicePath));
+      const file = fs.createReadStream(invoicePath);
+      
+      // gönderilen verinin headerını belirleme
+      res.setHeader("Content-Type", "application/pdf");
+
+      // gönderilen veri client browser'da açılsın mı indirilsin mi?
+      //res.setHeader('Content-Disposition','attachment; filename=example.pdf'); // bu isimle indirilsin.
+      res.setHeader("Content-Disposition", "inline"); // sadece açılsın.
+
+      // file.pipe(res); //readable stream to writable stream for large chunk of data 
+
+      // fs.readFile(invoicePath, (err, data) => {
+      // Authorized'sa veriyi yollayabilirsin
+      //   if (err) {
+      //     console.error("Error reading file:", err);
+      //     return next(err);
+      //   }
+
+      //   // gönderilen verinin headerını belirleme
+      //   res.setHeader("Content-Type", "application/pdf");
+
+      //   // gönderilen veri client browser'da açılsın mı indirilsin mi?
+      //   //res.setHeader('Content-Disposition','attachment; filename=example.pdf'); // bu isimle indirilsin.
+      //   res.setHeader("Content-Disposition", "inline"); // sadece açılsın.
+
+      //   res.send(data);
+      // });
+    })
+    .catch((err) => {
+      next(err);
     });
 };
